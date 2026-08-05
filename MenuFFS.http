@@ -1,0 +1,38 @@
+@host = http://localhost:5088
+
+### Health
+GET {{host}}/api/health
+Accept: application/json
+
+### Configurație publică – fără chei API
+GET {{host}}/api/config
+Accept: application/json
+
+### Traducere din text
+POST {{host}}/api/translate
+Accept: application/json
+Content-Type: multipart/form-data; boundary=MenuFfsBoundary
+
+--MenuFfsBoundary
+Content-Disposition: form-data; name="providerId"
+
+openai
+--MenuFfsBoundary
+Content-Disposition: form-data; name="model"
+
+gpt-5-mini
+--MenuFfsBoundary
+Content-Disposition: form-data; name="sourceLanguage"
+
+es
+--MenuFfsBoundary
+Content-Disposition: form-data; name="targetLanguage"
+
+ro
+--MenuFfsBoundary
+Content-Disposition: form-data; name="menuText"
+
+Paella de marisco
+Arroz con gambas, mejillones y calamares
+22,00 €
+--MenuFfsBoundary--
