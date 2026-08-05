@@ -1,0 +1,18 @@
+{
+  "name": "MenuFFS – Traducător de meniuri",
+  "short_name": "MenuFFS",
+  "description": "Tradu meniuri din imagini sau text cu modelul AI ales.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7f5",
+  "theme_color": "#0f766e",
+  "lang": "ro",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

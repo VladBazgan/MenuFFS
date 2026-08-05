@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f766e">
+    <meta name="description" content="MenuFFS traduce meniuri din fotografii sau text folosind modelul AI ales de tine.">
+    <title>MenuFFS · Traducător de meniuri cu AI</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="MenuFFS – pagina principală">
+            <img src="/assets/favicon.svg" alt="" width="42" height="42">
+            <span>
+                <strong>MenuFFS</strong>
+                <small>Înțelege meniul. Alege informat.</small>
+            </span>
+        </a>
+        <div class="privacy-pill" title="Imaginile nu sunt salvate de MenuFFS">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 2.8 8.3 7 10 4.2-1.7 7-5.2 7-10V6l-7-3Zm0 4a2 2 0 0 1 2 2v1h.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h.5V9a2 2 0 0 1 2-2Zm0 1a1 1 0 0 0-1 1v1h2V9a1 1 0 0 0-1-1Z"/></svg>
+            Procesare fără stocare
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="hero" aria-labelledby="page-title">
+            <div class="eyebrow"><span></span> Traducere vizuală directă</div>
+            <h1 id="page-title">Orice meniu, pe limba ta.</h1>
+            <p>Fotografiază meniul sau introdu textul, alege furnizorul și modelul AI, apoi primești o traducere clară în Markdown.</p>
+        </section>
+
+        <div id="startupError" class="alert alert-error" role="alert" hidden></div>
+
+        <div class="workspace-grid">
+            <section class="card input-card" aria-labelledby="translate-heading">
+                <div class="card-heading">
+                    <div>
+                        <span class="step-label">Configurare</span>
+                        <h2 id="translate-heading">Traducere nouă</h2>
+                    </div>
+                    <span class="no-fallback-badge">Fără fallback</span>
+                </div>
+
+                <form id="translationForm" novalidate>
+                    <div class="settings-grid">
+                        <label class="field">
+                            <span>Limba meniului</span>
+                            <span class="select-wrap">
+                                <select id="sourceLanguage" name="sourceLanguage" required aria-label="Limba meniului"></select>
+                                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+                            </span>
+                        </label>
+
+                        <label class="field">
+                            <span>Tradu în</span>
+                            <span class="select-wrap">
+                                <select id="targetLanguage" name="targetLanguage" required aria-label="Limba traducerii"></select>
+                                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+                            </span>
+                        </label>
+
+                        <label class="field">
+                            <span>Furnizor AI</span>
+                            <span class="select-wrap">
+                                <select id="provider" name="providerId" required aria-label="Furnizor AI"></select>
+                                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+                            </span>
+                        </label>
+
+                        <label class="field">
+                            <span>Model</span>
+                            <span class="select-wrap">
+                                <select id="model" name="model" required aria-label="Model AI"></select>
+                                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div id="providerStatus" class="provider-status" aria-live="polite"></div>
+
+                    <fieldset class="mode-fieldset">
+                        <legend>Conținutul meniului</legend>
+                        <div class="mode-switch" role="tablist" aria-label="Metoda de introducere">
+                            <button id="imageModeButton" class="mode-button active" type="button" role="tab" aria-selected="true" aria-controls="imagePane" data-mode="image">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h2l1-1h5l1 1h2A2.5 2.5 0 0 1 20 6.5v10a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-10ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 1.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg>
+                                Imagine
+                            </button>
+                            <button id="textModeButton" class="mode-button" type="button" role="tab" aria-selected="false" aria-controls="textPane" data-mode="text">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v2H5V4Zm0 5h14v2H5V9Zm0 5h9v2H5v-2Zm0 5h11v2H5v-2Z"/></svg>
+                                Text
+                            </button>
+                        </div>
+                    </fieldset>
+
+                    <div id="imagePane" class="input-pane" role="tabpanel" aria-labelledby="imageModeButton">
+                        <div id="dropZone" class="drop-zone">
+                            <div id="dropPrompt" class="drop-prompt">
+                                <div class="upload-icon">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 7.5 7.5l1.4 1.4 2.1-2.1V15h2V6.8l2.1 2.1 1.4-1.4L12 3ZM5 13v6h14v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6h2Z"/></svg>
+                                </div>
+                                <strong>Adaugă fotografia meniului</strong>
+                                <p>Trage imaginea aici sau folosește unul dintre butoane</p>
+                                <div class="file-actions">
+                                    <label class="button button-secondary" for="galleryInput">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4V4Zm2 2v9.2l3.2-3.2 2.5 2.5 2.8-3.5 3.5 4.4V6H6Zm2.5 4A1.5 1.5 0 1 0 8.5 7a1.5 1.5 0 0 0 0 3Z"/></svg>
+                                        Din galerie
+                                    </label>
+                                    <label class="button button-primary-soft" for="cameraInput">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h2l1-1h5l1 1h2A2.5 2.5 0 0 1 20 6.5v10a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-10ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
+                                        Fă o poză
+                                    </label>
+                                </div>
+                                <small>JPEG, PNG sau WebP · maximum <span id="maxImageSize">15 MB</span></small>
+                            </div>
+
+                            <div id="imagePreview" class="image-preview" hidden>
+                                <img id="previewImage" src="/assets/favicon.svg" alt="Previzualizarea meniului selectat">
+                                <div class="preview-overlay">
+                                    <div>
+                                        <strong id="imageName"></strong>
+                                        <span id="imageMeta"></span>
+                                    </div>
+                                    <button id="removeImageButton" class="icon-button" type="button" aria-label="Elimină imaginea">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10m0-10L7 17"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <input id="galleryInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+                        <input id="cameraInput" class="visually-hidden" type="file" accept="image/*" capture="environment">
+                        <p class="direct-vision-note">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3C6.5 3 2.2 8 2 12c.2 4 4.5 9 10 9s9.8-5 10-9c-.2-4-4.5-9-10-9Zm0 3a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0 2.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>
+                            Imaginea este analizată direct de modelul multimodal. MenuFFS nu utilizează OCR.
+                        </p>
+                    </div>
+
+                    <div id="textPane" class="input-pane" role="tabpanel" aria-labelledby="textModeButton" hidden>
+                        <label class="textarea-field">
+                            <span>Textul meniului</span>
+                            <textarea id="menuText" rows="13" placeholder="Lipește sau scrie aici preparatele, descrierile și prețurile…"></textarea>
+                        </label>
+                        <div class="textarea-footer">
+                            <span>Structura și prețurile vor fi păstrate.</span>
+                            <span><strong id="characterCount">0</strong>/<span id="maxCharacterCount">50.000</span></span>
+                        </div>
+                    </div>
+
+                    <div id="formError" class="alert alert-error compact" role="alert" hidden></div>
+
+                    <div class="submit-row">
+                        <div class="submit-copy">
+                            <strong>Va fi folosit exact modelul selectat.</strong>
+                            <span>Dacă acesta nu răspunde, vei primi eroarea reală.</span>
+                        </div>
+                        <button id="translateButton" class="button button-primary button-large" type="submit">
+                            <span>Tradu meniul</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h12m-5-5 5 5-5 5"/></svg>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="resultCard" class="card result-card" aria-labelledby="result-heading">
+                <div id="emptyState" class="result-state empty-state">
+                    <div class="empty-illustration" aria-hidden="true">
+                        <svg viewBox="0 0 120 120"><path class="plate" d="M22 68c2 19 18 32 38 32s36-13 38-32H22Z"/><path class="lid" d="M30 62c3-15 15-25 30-25s27 10 30 25H30Z"/><path class="handle" d="M54 32a6 6 0 0 1 12 0"/><path class="spark spark-a" d="m92 24 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z"/><path class="spark spark-b" d="m24 36 1.5 3.5L29 41l-3.5 1.5L24 46l-1.5-3.5L19 41l3.5-1.5L24 36Z"/></svg>
+                    </div>
+                    <span class="step-label">Rezultat</span>
+                    <h2 id="result-heading">Traducerea va apărea aici</h2>
+                    <p>MenuFFS va organiza categoriile, preparatele, ingredientele și prețurile într-un Markdown ușor de citit.</p>
+                    <div class="empty-features">
+                        <span><i></i> Prețuri păstrate</span>
+                        <span><i></i> Text neclar marcat</span>
+                        <span><i></i> Structură Markdown</span>
+                    </div>
+                </div>
+
+                <div id="loadingState" class="result-state loading-state" aria-live="polite" hidden>
+                    <div class="loader-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+                    <span class="step-label">Modelul lucrează</span>
+                    <h2 id="loadingTitle">Analizează meniul…</h2>
+                    <p id="loadingMessage">Cererea a fost trimisă modelului selectat.</p>
+                    <button id="cancelButton" class="button button-secondary" type="button">Oprește cererea</button>
+                </div>
+
+                <div id="resultContent" hidden>
+                    <div class="result-header">
+                        <div>
+                            <span class="step-label">Traducere finalizată</span>
+                            <h2>Rezultatul MenuFFS</h2>
+                        </div>
+                        <div class="result-actions">
+                            <button id="copyButton" class="icon-button labeled" type="button" title="Copiază Markdown">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V4h12v12h-3M4 8h12v12H4V8Z"/></svg>
+                                <span>Copiază</span>
+                            </button>
+                            <button id="downloadButton" class="icon-button labeled" type="button" title="Descarcă fișierul Markdown">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 19h14"/></svg>
+                                <span>Descarcă</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="resultMeta" class="result-meta"></div>
+
+                    <div class="result-tabs" role="tablist" aria-label="Format rezultat">
+                        <button id="previewTab" class="result-tab active" type="button" role="tab" aria-selected="true">Previzualizare</button>
+                        <button id="rawTab" class="result-tab" type="button" role="tab" aria-selected="false">Markdown</button>
+                    </div>
+
+                    <article id="markdownPreview" class="markdown-body" aria-label="Meniu tradus"></article>
+                    <pre id="markdownRaw" class="markdown-raw" tabindex="0" hidden></pre>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <span>MenuFFS</span>
+        <span>Verifică întotdeauna alergenii direct cu restaurantul.</span>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <noscript>
+        <div class="noscript-message">MenuFFS are nevoie de JavaScript pentru încărcarea imaginilor și afișarea traducerii.</div>
+    </noscript>
+
+    <script src="/app.js" defer></script>
+</body>
+</html>
